@@ -82,23 +82,19 @@ function computePMT({ N, IYR, PV, FV }: TVMRegisters): number {
 
 function computeN({ IYR, PV, PMT, FV }: TVMRegisters): number {
   const i = IYR / 100;
+  let n: number;
   if (i === 0) {
-    // PV + PMT*N + FV = 0 => N = - (PV + FV) / PMT
     if (PMT === 0) return 0;
-    return - (PV + FV) / PMT;
+    n = - (PV + FV) / PMT;
+  } else {
+    const denom = PV + PMT / i;
+    if (denom === 0) return 0;
+    const X = (-FV + PMT / i) / denom;
+    if (X <= 0) return 0;
+    n = Math.log(X) / Math.log(1 + i);
   }
-  // Solve for N in: PV*(1+i)^N + PMT*((1+i)^N - 1)/i + FV = 0
-  // Rearranged: PV*(1+i)^N + PMT*((1+i)^N - 1)/i = -FV
-  // Let X = (1+i)^N
-  // PV*X + PMT*(X - 1)/i = -FV
-  // PV*X + PMT*X/i - PMT/i = -FV
-  // (PV + PMT/i)*X = -FV + PMT/i
-  // X = (-FV + PMT/i) / (PV + PMT/i)
-  const denom = PV + PMT / i;
-  if (denom === 0) return 0;
-  const X = (-FV + PMT / i) / denom;
-  if (X <= 0) return 0;
-  return Math.log(X) / Math.log(1 + i);
+  // HP 12C convention: round up to next integer if fractional
+  return Math.ceil(n);
 }
 
 // Newton-Raphson for i
