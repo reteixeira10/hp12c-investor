@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 const buttonLabels = [
   ["N", "i", "PV", "PMT", "FV"],
+  ["→i%yr", "→i%mo"],
   ["7", "8", "9", "/"],
   ["4", "5", "6", "*"],
   ["1", "2", "3", "-"],
@@ -184,6 +185,22 @@ const Home: React.FC = () => {
         if (label === "i") newValue = computeIYR(tvm);
         setTVM((prev) => ({ ...prev, [label.replace("/", "")]: newValue }));
         setInput(Number(newValue).toFixed(2)); // <-- format here
+      }
+    }
+    else if (label === "→i%mo") {
+      // Convert annual to monthly
+      if (input !== "") {
+        const iyr = parseFloat(input);
+        const imo = (Math.pow(1 + iyr / 100, 1 / 12) - 1) * 100;
+        setInput(imo.toFixed(6)); // show up to 6 decimals for precision
+      }
+    }
+    else if (label === "→i%yr") {
+      // Convert monthly to annual
+      if (input !== "") {
+        const imo = parseFloat(input);
+        const iyr = (Math.pow(1 + imo / 100, 12) - 1) * 100;
+        setInput(iyr.toFixed(6));
       }
     }
   };
