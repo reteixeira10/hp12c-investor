@@ -1,60 +1,48 @@
-import { TVMRegisters } from "../types";
-type SidePanelProps = { stack: number[]; tvm: TVMRegisters };
-export const SidePanel = ({ stack, tvm }: SidePanelProps) => (
-  <div style={{
-    background: "#333",
-    color: "#fff",
-    borderRadius: "12px",
-    boxShadow: "0 4px 24px #0008",
-    padding: "24px",
-    minWidth: "120px",
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center"
-  }}>
-    <div style={{
-      fontWeight: "bold",
-      marginBottom: "12px",
-      fontSize: "1.1rem",
-      letterSpacing: "1px"
-    }}>
-      RPN Stack
-    </div>
-    <div style={{
-      fontFamily: "monospace",
-      fontSize: "1.2rem",
-      width: "100%",
-      textAlign: "right"
-    }}>
-      {stack.length === 0 ? (
-        <div style={{ color: "#888" }}>Empty</div>
-      ) : (
-        [...stack].reverse().map((val, idx) => (
-          <div key={idx}>{Number(val).toFixed(2)}</div>
-        ))
-      )}
-    </div>
-    <div style={{
-      fontWeight: "bold",
-      marginTop: "24px",
-      marginBottom: "8px",
-      fontSize: "1.1rem",
-      letterSpacing: "1px"
-    }}>
-      TVM Registers
-    </div>
-    <div style={{
-      fontFamily: "monospace",
-      fontSize: "1rem",
-      width: "100%",
-      textAlign: "right"
-    }}>
-      <div>N: {Number(tvm.N).toFixed(2)}</div>
-      <div>i: {Number(tvm.IYR).toFixed(2)}</div>
-      <div>PV: {Number(tvm.PV).toFixed(2)}</div>
-      <div>PMT: {Number(tvm.PMT).toFixed(2)}</div>
-      <div>FV: {Number(tvm.FV).toFixed(2)}</div>
-    </div>
-  </div>
-);
+import React from "react";
+import { TVM } from "../types";
+
+interface SidePanelProps {
+  stack: string[];
+  tvm: TVM;
+}
+
+const SidePanel: React.FC<SidePanelProps> = ({ stack, tvm }) => {
+    return (
+      <div style={{
+        background: "rgba(255, 255, 255, 0.1)",
+        borderRadius: "12px",
+        boxShadow: "0 4px 24px #0008",
+        padding: "32px",
+        width: "280px",
+        color: "white"
+      }}>
+        <div style={{ marginBottom: "24px" }}>
+          <h3 style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.3)", paddingBottom: "8px", marginBottom: "12px" }}>Stack</h3>
+          <div style={{
+            background: "rgba(0, 0, 0, 0.2)",
+            borderRadius: "8px",
+            padding: "12px",
+            minHeight: "120px"
+          }}>
+            {stack.map((item, index) => <div key={index}>{`x${index + 1}: ${Number(item).toFixed(2)}`}</div>)}
+          </div>
+        </div>
+        <div>
+          <h3 style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.3)", paddingBottom: "8px", marginBottom: "12px" }}>TVM Registers</h3>
+          <div style={{
+            background: "rgba(0, 0, 0, 0.2)",
+            borderRadius: "8px",
+            padding: "12px"
+          }}>
+            <div>N: {tvm.N.toFixed(2)}</div>
+            <div>i: {tvm.IYR.toFixed(2)}</div>
+            <div>PV: {tvm.PV.toFixed(2)}</div>
+            <div>PMT: {tvm.PMT.toFixed(2)}</div>
+            <div>FV: {tvm.FV.toFixed(2)}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+export default SidePanel;

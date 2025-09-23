@@ -1,34 +1,38 @@
-type KeypadProps = {
+import React from "react";
+
+interface KeypadProps {
   buttonLabels: string[][];
   onButtonClick: (label: string) => void;
   pressedKey: string | null;
-};
-export const Keypad = ({ buttonLabels, onButtonClick, pressedKey }: KeypadProps) => (
-  <div>
-    {buttonLabels.map((row, i) => (
-      <div key={i} style={{ display: "flex", marginBottom: "8px" }}>
-        {row.map((label) => (
+}
+
+const Keypad: React.FC<KeypadProps> = ({ buttonLabels, onButtonClick, pressedKey }) => {
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "12px" }}>
+        {buttonLabels.flat().map((label, index) => (
           <button
-            key={label}
+            key={index}
             onClick={() => onButtonClick(label)}
             style={{
-              flex: 1,
-              margin: "2px",
-              padding: "16px",
-              fontSize: "1.1rem",
-              background: ["N", "i", "PV", "PMT", "FV"].includes(label) ? "#b8860b" : "#444",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
+              background: label === pressedKey ? "rgba(255, 255, 255, 0.3)" : "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              borderRadius: "8px",
+              color: "white",
+              padding: "16px 0",
+              textAlign: "center",
               cursor: "pointer",
-              boxShadow: pressedKey === label ? "0 0 0 3px #fff" : undefined,
-              opacity: pressedKey === label ? 0.7 : 1,
+              fontSize: "15px",
+              fontWeight: "bold",
+              transition: "background 0.2s ease-in-out",
+              boxShadow: "0 2px 8px #0004",
+              transform: label === pressedKey ? "scale(0.95)" : "scale(1)"
             }}
           >
             {label}
           </button>
         ))}
       </div>
-    ))}
-  </div>
-);
+    );
+  };
+
+export default Keypad;

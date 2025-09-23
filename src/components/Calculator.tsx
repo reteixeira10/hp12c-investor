@@ -1,65 +1,63 @@
 import React, { useState } from "react";
-import { TVMRegisters } from "../types";
-import { computeFV, computePV, computePMT, computeN, computeIYR } from "../utils/tvm";
-import { rpnCalculate } from "../utils/rpn";
-import { Display } from "./Display";
-import { Keypad } from "./Keypad";
-import { SidePanel } from "./SidePanel";
+import Display from "./Display";
+import Keypad from "./Keypad";
+import SidePanel from "./SidePanel";
+import { TVM } from "../types";
+import { rpn } from "../utils/rpn";
+import { computeFV, computeIYR, computeN, computePMT, computePV } from "../utils/tvm";
 
 const buttonLabels = [
   ["N", "i", "PV", "PMT", "FV"],
-  ["→i%yr", "→i%mo"],
-  ["7", "8", "9", "/"],
-  ["4", "5", "6", "*"],
-  ["1", "2", "3", "-"],
-  ["0", ".", "Enter", "CHS", "+"],
-  ["C"],
+  ["x⇔y", "CLx", "R↓", "%", "→i%mo"],
+  ["y^x", "1/x", "√x", "CHS", "→i%yr"],
+  ["EEX", "ENTER", "7", "8", "9"],
+  ["STO", "RCL", "4", "5", "6"],
+  ["+", "-", "1", "2", "3"],
+  ["÷", "×", "0", ".", "RESET"],
 ];
 
-export const Calculator: React.FC = () => {
-  const [stack, setStack] = useState<number[]>([]);
+const Calculator: React.FC = () => {
+  const [stack, setStack] = useState<string[]>([]);
   const [input, setInput] = useState<string>("");
-  const [tvm, setTVM] = useState<TVMRegisters>({
-    N: 0,
-    IYR: 0,
-    PV: 0,
-    PMT: 0,
-    FV: 0,
-  });
+  const [tvm, setTVM] = useState<TVM>({ N: 0, IYR: 0, PV: 0, PMT: 0, FV: 0 });
   const [pressedKey, setPressedKey] = useState<string | null>(null);
 
   const handleButton = (label: string) => {
-    if (/\d|\./.test(label)) {
-      setInput((prev) => prev + label);
-    } else if (label === "Enter") {
+    if (label >= "0" && label <= "9") {
+      setInput(input + label);
+    } else if (label === ".") {
+      if (!input.includes(".")) {
+        setInput(input + ".");
+      }
+    } else if (label === "ENTER") {
       if (input !== "") {
-        setStack((prev) => [...prev, parseFloat(input)]);
+        setStack([...stack, input]);
         setInput("");
       }
-    } else if (["+", "-", "*", "/"].includes(label)) {
-      let newStack = [...stack];
+    } else if (label === "CLx") {
+      setInput("");
+    } else if (label === "CHS") {
       if (input !== "") {
-        newStack.push(parseFloat(input));
-        setInput("");
+        setInput((prev) => (prev.startsWith("-") ? prev.slice(1) : `-${prev}`));
       }
-      newStack = rpnCalculate(newStack, label);
-      setStack(newStack);
-    } else if (label === "C") {
+    } else if (label === "RESET") {
       setStack([]);
       setInput("");
       setTVM({ N: 0, IYR: 0, PV: 0, PMT: 0, FV: 0 });
-    }
-    // CHS key
-    else if (label === "CHS") {
+    } else if (["+", "-", "×", "÷", "y^x", "x⇔y", "R↓"].includes(label)) {
+      if (stack.length >= 2 || ["x⇔y", "R↓"].includes(label)) {
+        const [newStack, result] = rpn(stack, label, input);
+        setStack(newStack);
+        setInput(result);
+      }
+    } else if (["1/x", "√x"].includes(label)) {
       if (input !== "") {
-        if (input.startsWith("-")) {
-          setInput(input.substring(1));
-        } else {
-          setInput("-" + input);
-        }
+        const [newStack, result] = rpn(stack, label, input);
+        setStack(newStack);
+        setInput(result);
       }
     }
-    // Interest conversion keys
+    // Change of interest rate
     else if (label === "→i%mo") {
       if (input !== "") {
         const iyr = parseFloat(input);
@@ -104,30 +102,32 @@ export const Calculator: React.FC = () => {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "#222"
-    }}>
-      <div style={{ display: "flex", gap: "32px" }}>
-        <div style={{
-          background: "#c2b280",
-          borderRadius: "12px",
-          boxShadow: "0 4px 24px #0008",
-          padding: "32px",
-          width: "340px"
-        }}>
-          <Display value={input !== "" ? input : (stack.length > 0 ? Number(stack[stack.length - 1]).toFixed(2) : "0.00")} />
-          <Keypad buttonLabels={buttonLabels} onButtonClick={(label) => {
-            setPressedKey(label);
-            handleButton(label);
-            setTimeout(() => setPressedKey(null), 120);
-          }} pressedKey={pressedKey} />
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(to right, #434343 0%, black 100%)"
+      }}>
+        <div style={{ display: "flex", gap: "32px" }}>
+          <div style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            borderRadius: "12px",
+            boxShadow: "0 4px 24px #0008",
+            padding: "32px",
+            width: "340px"
+          }}>
+            <Display value={input !== "" ? input : (stack.length > 0 ? Number(stack[stack.length - 1]).toFixed(2) : "0.00")} />
+            <Keypad buttonLabels={buttonLabels} onButtonClick={(label) => {
+              setPressedKey(label);
+              handleButton(label);
+              setTimeout(() => setPressedKey(null), 120);
+            }} pressedKey={pressedKey} />
+          </div>
+          <SidePanel stack={stack} tvm={tvm} />
         </div>
-        <SidePanel stack={stack} tvm={tvm} />
       </div>
-    </div>
-  );
-};
+    );
+  };
+
+export default Calculator;
