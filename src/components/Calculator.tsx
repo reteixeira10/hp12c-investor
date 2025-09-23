@@ -5,6 +5,7 @@ import SidePanel from "./SidePanel";
 import { TVM } from "../types";
 import { rpn } from "../utils/rpn";
 import { computeFV, computeIYR, computeN, computePMT, computePV } from "../utils/tvm";
+import { toMonthlyRate, toYearlyRate } from "../utils/misc";
 
 const buttonLabels = [
   ["N", "i", "PV", "PMT", "FV"],
@@ -71,14 +72,14 @@ const Calculator: React.FC = () => {
     else if (label === "→i%mo") {
       if (input !== "") {
         const iyr = parseFloat(input);
-        const imo = (Math.pow(1 + iyr / 100, 1 / 12) - 1) * 100;
+        const imo = toMonthlyRate(iyr);
         setInput(imo.toFixed(6));
       }
     }
     else if (label === "→i%yr") {
       if (input !== "") {
         const imo = parseFloat(input);
-        const iyr = (Math.pow(1 + imo / 100, 12) - 1) * 100;
+        const iyr = toYearlyRate(imo);
         setInput(iyr.toFixed(6));
       }
     }

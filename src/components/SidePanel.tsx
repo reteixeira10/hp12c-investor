@@ -17,7 +17,7 @@ const SidePanel: React.FC<SidePanelProps> = ({ stack, tvm }) => {
         color: "white"
       }}>
         <div style={{ marginBottom: "24px" }}>
-          <h3 style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.3)", paddingBottom: "8px", marginBottom: "12px" }}>Stack</h3>
+          <h3 style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.3)", paddingBottom: "8px", marginBottom: "12px" }}>Stack RPN</h3>
           <div style={{
             background: "rgba(0, 0, 0, 0.2)",
             borderRadius: "8px",
