@@ -1,4 +1,4 @@
-export type TVMRegisters = {
+export type TVM = {
   N: number;
   IYR: number;
   PV: number;

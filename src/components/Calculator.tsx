@@ -44,17 +44,27 @@ const Calculator: React.FC = () => {
       setStack([]);
       setInput("");
       setTVM({ N: 0, IYR: 0, PV: 0, PMT: 0, FV: 0 });
-    } else if (["+", "-", "×", "÷", "y^x", "x⇔y", "R↓"].includes(label)) {
-      if (stack.length >= 2 || ["x⇔y", "R↓"].includes(label)) {
-        const [newStack, result] = rpn(stack, label, input);
-        setStack(newStack);
-        setInput(result);
+    } else if (["+", "-", "×", "÷", "y^x", "x⇔y", "R↓", "1/x", "√x"].includes(label)) {
+      // Unary operators require an input value
+      if (["1/x", "√x"].includes(label) && input === "") {
+        return; // Do nothing if there's no input for unary ops
       }
-    } else if (["1/x", "√x"].includes(label)) {
-      if (input !== "") {
-        const [newStack, result] = rpn(stack, label, input);
-        setStack(newStack);
-        setInput(result);
+      // Binary and stack operators require at least one item on the stack
+      if (["+", "-", "×", "÷", "y^x", "x⇔y", "R↓"].includes(label) && stack.length < 1) {
+        return; // Do nothing if stack is empty for these ops
+      }
+
+      const [newStack, result] = rpn(stack, label, input);
+      setStack(newStack);
+      // After an RPN operation, the result is in the input, and we should clear the stack entry just used.
+      if (!["x⇔y", "R↓"].includes(label)) { // These operations manage the stack differently
+          setInput(result);
+          if (["+", "-", "×", "÷", "y^x"].includes(label)) {
+            // The RPN function I wrote already returns the new stack
+            // and the result. The component just needs to set them.
+          }
+      } else {
+        setInput(result)
       }
     }
     // Change of interest rate
