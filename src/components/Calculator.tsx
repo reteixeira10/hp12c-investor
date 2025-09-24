@@ -20,23 +20,34 @@ const buttonLabels = [
 const Calculator: React.FC = () => {
   const [stack, setStack] = useState<string[]>([]);
   const [input, setInput] = useState<string>("");
+  const [isResultDisplayed, setIsResultDisplayed] = useState<boolean>(false);
   const [tvm, setTVM] = useState<TVM>({ N: 0, IYR: 0, PV: 0, PMT: 0, FV: 0 });
   const [pressedKey, setPressedKey] = useState<string | null>(null);
 
   const handleButton = (label: string) => {
     if (label >= "0" && label <= "9") {
-      setInput(input + label);
+      if (isResultDisplayed) {
+        setInput(label);
+        setIsResultDisplayed(false);
+      } else {
+        setInput(input + label);
+      }
     } else if (label === ".") {
-      if (!input.includes(".")) {
+      if (isResultDisplayed) {
+        setInput("0.");
+        setIsResultDisplayed(false);
+      } else if (!input.includes(".")) {
         setInput(input + ".");
       }
     } else if (label === "ENTER") {
       if (input !== "") {
         setStack([...stack, input]);
         setInput("");
+        setIsResultDisplayed(false);
       }
     } else if (label === "CLx") {
       setInput("");
+      setIsResultDisplayed(false);
     } else if (label === "CHS") {
       if (input !== "") {
         setInput((prev) => (prev.startsWith("-") ? prev.slice(1) : `-${prev}`));
@@ -45,42 +56,35 @@ const Calculator: React.FC = () => {
       setStack([]);
       setInput("");
       setTVM({ N: 0, IYR: 0, PV: 0, PMT: 0, FV: 0 });
+      setIsResultDisplayed(false);
     } else if (["+", "-", "×", "÷", "y^x", "x⇔y", "R↓", "1/x", "√x"].includes(label)) {
-      // Unary operators require an input value
       if (["1/x", "√x"].includes(label) && input === "") {
-        return; // Do nothing if there's no input for unary ops
+        return;
       }
-      // Binary and stack operators require at least one item on the stack
       if (["+", "-", "×", "÷", "y^x", "x⇔y", "R↓"].includes(label) && stack.length < 1) {
-        return; // Do nothing if stack is empty for these ops
+        return;
       }
 
-      const [newStack, result] = rpn(stack, label, input);
+      const [newStack, result] = rpn(stack, label, isResultDisplayed ? "" : input);
       setStack(newStack);
-      // After an RPN operation, the result is in the input, and we should clear the stack entry just used.
-      if (!["x⇔y", "R↓"].includes(label)) { // These operations manage the stack differently
-          setInput(result);
-          if (["+", "-", "×", "÷", "y^x"].includes(label)) {
-            // The RPN function I wrote already returns the new stack
-            // and the result. The component just needs to set them.
-          }
-      } else {
-        setInput(result)
-      }
+      setInput(result);
+      setIsResultDisplayed(true);
     }
     // Change of interest rate
     else if (label === "→i%mo") {
       if (input !== "") {
         const iyr = parseFloat(input);
         const imo = toMonthlyRate(iyr);
-        setInput(imo.toFixed(6));
+        setInput(imo.toString());
+        setIsResultDisplayed(true);
       }
     }
     else if (label === "→i%yr") {
       if (input !== "") {
         const imo = parseFloat(input);
         const iyr = toYearlyRate(imo);
-        setInput(iyr.toFixed(6));
+        setInput(iyr.toString());
+        setIsResultDisplayed(true);
       }
     }
     // TVM keys
@@ -98,18 +102,47 @@ const Calculator: React.FC = () => {
           return updated;
         });
         setInput("");
+        setIsResultDisplayed(false);
       } else {
         // Calculate value for the pressed TVM key
-        let newValue = 0;
-        if (label === "FV") newValue = computeFV(tvm);
-        if (label === "PV") newValue = computePV(tvm);
-        if (label === "PMT") newValue = computePMT(tvm);
-        if (label === "N") newValue = computeN(tvm);
-        if (label === "i") newValue = computeIYR(tvm);
+        let newValue: number;
+        if (label === "FV") {
+          newValue = computeFV(tvm);
+        } else if (label === "PV") {
+          newValue = computePV(tvm);
+        } else if (label === "PMT") {
+          newValue = computePMT(tvm);
+        } else if (label === "N") {
+          newValue = Math.ceil(computeN(tvm));
+        } else { // "i"
+          newValue = computeIYR(tvm);
+        }
+
         setTVM((prev) => ({ ...prev, [label === "i" ? "IYR" : label]: newValue }));
-        setInput(Number(newValue).toFixed(2));
+        setInput(newValue.toString());
+        setIsResultDisplayed(true);
       }
     }
+  };
+
+  const getDisplayValue = () => {
+    if (input === "") {
+        if (stack.length > 0) {
+            const lastInStack = stack[stack.length - 1];
+            const num = parseFloat(lastInStack);
+            return Number.isInteger(num) ? num.toString() : num.toFixed(2);
+        }
+        return "0.00";
+    }
+
+    if (isResultDisplayed) {
+        const num = parseFloat(input);
+        if (isNaN(num)) return "Error";
+        if (Number.isInteger(num)) return num.toString();
+        return num.toFixed(2);
+    }
+
+    return input;
   };
 
   return (
@@ -128,7 +161,7 @@ const Calculator: React.FC = () => {
             padding: "32px",
             width: "340px"
           }}>
-            <Display value={input !== "" ? input : (stack.length > 0 ? Number(stack[stack.length - 1]).toFixed(2) : "0.00")} />
+            <Display value={getDisplayValue()} />
             <Keypad buttonLabels={buttonLabels} onButtonClick={(label) => {
               setPressedKey(label);
               handleButton(label);
