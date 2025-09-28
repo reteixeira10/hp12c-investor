@@ -6,10 +6,12 @@ import { TVM } from "../types";
 import { rpn } from "../utils/rpn";
 import { computeFV, computeIYR, computeN, computePMT, computePV } from "../utils/tvm";
 import { toMonthlyRate, toYearlyRate } from "../utils/misc";
+import { calculateMonthsBetweenDates } from "../utils/date";
+import TutorialGuide from "./TutorialGuide";
 
 const buttonLabels = [
   ["N", "i", "PV", "PMT", "FV"],
-  ["x⇔y", "CLx", "R↓", "%", "→i%mo"],
+  ["x⇔y", "CLx", "R↓", "ΔMTS", "→i%mo"],
   ["y^x", "1/x", "√x", "CHS", "→i%yr"],
   ["EEX", "ENTER", "7", "8", "9"],
   ["STO", "RCL", "4", "5", "6"],
@@ -23,8 +25,43 @@ const Calculator: React.FC = () => {
   const [isResultDisplayed, setIsResultDisplayed] = useState<boolean>(false);
   const [tvm, setTVM] = useState<TVM>({ N: 0, IYR: 0, PV: 0, PMT: 0, FV: 0 });
   const [pressedKey, setPressedKey] = useState<string | null>(null);
+  const [dateMode, setDateMode] = useState<boolean>(false);
+  const [dateInputs, setDateInputs] = useState<string[]>([]);
 
   const handleButton = (label: string) => {
+    if (label === "ΔMTS") {
+      setDateMode(true);
+      setInput("");
+      setDateInputs([]);
+      return;
+    }
+
+    if (dateMode) {
+      if ((label >= "0" && label <= "9") || label === ".") {
+        if (isResultDisplayed) {
+          setInput(label);
+          setIsResultDisplayed(false);
+        } else {
+          setInput(input + label);
+        }
+      } else if (label === "ENTER") {
+        if (input !== "") {
+          if (dateInputs.length === 0) {
+            setDateInputs([input]);
+            setInput("");
+          } else {
+            const [date1] = dateInputs;
+            const result = calculateMonthsBetweenDates(date1, input);
+            setInput(result.toString());
+            setDateMode(false);
+            setDateInputs([]);
+            setIsResultDisplayed(true);
+          }
+        }
+      }
+      return;
+    }
+
     if (label >= "0" && label <= "9") {
       if (isResultDisplayed) {
         setInput(label);
@@ -42,12 +79,11 @@ const Calculator: React.FC = () => {
     } else if (label === "ENTER") {
       if (input !== "") {
         setStack([...stack, input]);
-        setInput("");
-        setIsResultDisplayed(false);
+        setIsResultDisplayed(true);
       }
     } else if (label === "CLx") {
-      setInput("");
-      setIsResultDisplayed(false);
+        setInput("0");
+        setIsResultDisplayed(true);
     } else if (label === "CHS") {
       if (input !== "") {
         setInput((prev) => (prev.startsWith("-") ? prev.slice(1) : `-${prev}`));
@@ -126,6 +162,10 @@ const Calculator: React.FC = () => {
   };
 
   const getDisplayValue = () => {
+    if (dateMode) {
+      if (input === "" && dateInputs.length === 0) return "dd.mm.yyyy";
+      if (input === "" && dateInputs.length === 1) return "dd.mm.yyyy";
+    }
     if (input === "") {
         if (stack.length > 0) {
             const lastInStack = stack[stack.length - 1];
@@ -153,6 +193,7 @@ const Calculator: React.FC = () => {
         justifyContent: "center",
         background: "linear-gradient(to right, #434343 0%, black 100%)"
       }}>
+        <TutorialGuide />
         <div style={{ display: "flex", gap: "32px" }}>
           <div style={{
             background: "rgba(255, 255, 255, 0.1)",
