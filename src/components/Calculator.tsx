@@ -189,9 +189,10 @@ const Calculator: React.FC = () => {
       <div style={{
         minHeight: "100vh",
         display: "flex",
-        alignItems: "center",
+        alignItems: "start",
         justifyContent: "center",
-        background: "linear-gradient(to right, #434343 0%, black 100%)"
+        background: "linear-gradient(to right, #434343 0%, black 100%)",
+        paddingTop: "50px"
       }}>
         <TutorialGuide />
         <div style={{ display: "flex", gap: "32px" }}>

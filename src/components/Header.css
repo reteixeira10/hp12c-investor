@@ -1,0 +1,49 @@
+
+.app-header {
+  text-align: center;
+  padding-bottom: 20px;
+  color: white;
+  background: linear-gradient(to right, rgb(67, 67, 67) 0%, black 100%);
+}
+
+.header-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-logo {
+  height: 40px;
+  margin-right: 15px;
+}
+
+.nav-bar {
+	background-color: rgba(255, 255, 255, 0.08);
+	backdrop-filter: blur(5px);
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	border-radius: 8vw;
+	margin: 0 auto;
+	max-width: 500px;
+}
+
+.nav {
+	flex: 1;
+	padding: 20px 20px;
+	color: #fff;
+	text-align: center;
+	text-decoration: none;
+	font-family: poppins, sans-serif;
+}
+.nav.active {
+	background: #99d5ea33;
+  	color: black;
+	border-radius: 8vw 0 0 8vw;
+}
+
+/* .nav:not(.active):hover {
+    background: #ffffff1a;
+    border-radius: 8vw;
+} */
