@@ -5,3 +5,11 @@ export function toMonthlyRate(iyr: number): number {
 export function toYearlyRate(imo: number): number {
   return (Math.pow(1 + imo / 100, 12) - 1) * 100;
 }
+
+export function toFifteenPercentIR(value: number): number {
+  return value / (1 - 0.15);
+}
+
+export function toTwentyTwoPointFivePercentIR(value: number): number {
+  return value / (1 - 0.225);
+}

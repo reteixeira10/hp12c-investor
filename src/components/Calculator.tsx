@@ -5,12 +5,13 @@ import SidePanel from "./SidePanel";
 import { TVM } from "../types";
 import { rpn } from "../utils/rpn";
 import { computeFV, computeIYR, computeN, computePMT, computePV } from "../utils/tvm";
-import { toMonthlyRate, toYearlyRate } from "../utils/misc";
+import { toMonthlyRate, toYearlyRate, toFifteenPercentIR, toTwentyTwoPointFivePercentIR } from "../utils/misc";
 import { calculateMonthsBetweenDates } from "../utils/date";
 import TutorialGuide from "./TutorialGuide";
 
 const buttonLabels = [
   ["N", "i", "PV", "PMT", "FV"],
+  ["→15%IR", "→22.5%IR", "", "", ""],
   ["x⇔y", "CLx", "R↓", "ΔMTS", "→i%mo"],
   ["y^x", "1/x", "√x", "CHS", "→i%yr"],
   ["EEX", "ENTER", "7", "8", "9"],
@@ -123,6 +124,22 @@ const Calculator: React.FC = () => {
         setIsResultDisplayed(true);
       }
     }
+    else if (label === "→15%IR") {
+      if (input !== "") {
+        const value = parseFloat(input);
+        const result = toFifteenPercentIR(value);
+        setInput(result.toString());
+        setIsResultDisplayed(true);
+      }
+    }
+    else if (label === "→22.5%IR") {
+      if (input !== "") {
+        const value = parseFloat(input);
+        const result = toTwentyTwoPointFivePercentIR(value);
+        setInput(result.toString());
+        setIsResultDisplayed(true);
+      }
+    }
     // TVM keys
     else if (["N", "i", "PV", "PMT", "FV"].includes(label)) {
       if (input !== "") {
@@ -201,7 +218,6 @@ const Calculator: React.FC = () => {
             borderRadius: "12px",
             boxShadow: "0 4px 24px #0008",
             padding: "32px",
-            width: "340px"
           }}>
             <Display value={getDisplayValue()} />
             <Keypad buttonLabels={buttonLabels} onButtonClick={(label) => {

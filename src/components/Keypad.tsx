@@ -25,7 +25,9 @@ const Keypad: React.FC<KeypadProps> = ({ buttonLabels, onButtonClick, pressedKey
               fontWeight: "bold",
               transition: "background 0.2s ease-in-out",
               boxShadow: "0 2px 8px #0004",
-              transform: label === pressedKey ? "scale(0.95)" : "scale(1)"
+              transform: label === pressedKey ? "scale(0.95)" : "scale(1)",
+              height: "50px",
+              width: "100px"
             }}
           >
             {label}
