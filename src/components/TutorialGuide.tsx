@@ -69,7 +69,7 @@ const TutorialGuide = () => {
         />
         <AccordionItem
           title="Misc Functions"
-          content={<p>The miscellaneous functions include converting interest rates. `→i%mo` converts a yearly rate to a monthly rate, and `→i%yr` converts a monthly rate to a yearly rate.</p>}
+          content={<p>The miscellaneous functions include converting interest rates. `→i%mo` converts a yearly rate to a monthly rate, and `→i%yr` converts a monthly rate to a yearly rate. `→15%IR` and `→22.5%IR` convert tax-free investment to investment with 15% or 22.5% IR respectively.</p>}
         />
       </div>
     </div>

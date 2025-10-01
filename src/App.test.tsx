@@ -4,7 +4,7 @@ import App from './App';
 import { rpn } from './utils/rpn';
 import { computeFV, computePV, computePMT, computeN, computeIYR } from './utils/tvm';
 import { TVM } from './types';
-import { toMonthlyRate, toYearlyRate } from './utils/misc';
+import { toMonthlyRate, toYearlyRate, toFifteenPercentIR, toTwentyTwoPointFivePercentIR } from './utils/misc';
 import { calculateMonthsBetweenDates } from './utils/date';
 
 describe('Calculator App', () => {
@@ -71,6 +71,18 @@ describe('Calculator App', () => {
     const imo = 1;
     const calculatedYearlyRate = toYearlyRate(imo);
     expect(calculatedYearlyRate).toBeCloseTo(12.68, 2);
+  });
+
+  test('it should correctly calculate for →15%IR', () => {
+    const value = 11.5;
+    const result = toFifteenPercentIR(value);
+    expect(result).toBeCloseTo(13.53, 2);
+  });
+
+  test('it should correctly calculate for →22.5%IR', () => {
+    const value = 11.5;
+    const result = toTwentyTwoPointFivePercentIR(value);
+    expect(result).toBeCloseTo(14.84, 2);
   });
 
 
